@@ -1,140 +1,70 @@
-// const targetObject = {
-//     // properties and methods
-//   };
-  
-//   const handler = {
-//     // traps for intercepting operations on the target object
-//   };
-  
-//   const proxy = new Proxy(targetObject, handler);
+const arr = [1,2,3,4, [5,6,7,[2,4,5,[50,50,50]]],8,9];
 
-// * ###################################################################
+// ? End Result | Output ->  [1,2,3,4,5,6,7,8,9]
 
-// Finding an array item object by its property
-const products = new Proxy([
-  { name: 'Firefox', type: 'browser' },
-  { name: 'SeaMonkey', type: 'browser' },
-  { name: 'Thunderbird', type: 'mailer' }
-],
-{
-  get(obj, prop) {
-    // The default behavior to return the value; prop is usually an integer
-    if (prop in obj) {
-      return obj[prop];
-    }
+const result = []
+// * Deep Flatten I (Iterative - Recursive)
+// function deepFlattenI (arr) {
 
-    // Get the number of products; an alias of products.length
-    if (prop === 'number') {
-      return obj.length;
-    }
-
-    let result;
-    const types = {};
-
-    for (const product of obj) {
-      if (product.name === prop) {
-        result = product;
-      }
-      if (types[product.type]) {
-        types[product.type].push(product);
-      } else {
-        types[product.type] = [product];
-      }
-    }
-
-    // Get a product by name
-    if (result) {
-      return result;
-    }
-
-    // Get products by type
-    if (prop in types) {
-      return types[prop];
-    }
-
-    // Get product types
-    if (prop === 'types') {
-      return Object.keys(types);
-    }
-
-    return undefined;
-  }
-});
-
-console.log(products[0]);          // { name: 'Firefox', type: 'browser' }
-console.log(products['Firefox']);  // { name: 'Firefox', type: 'browser' }
-console.log(products['Chrome']);   // undefined
-console.log(products.browser);     // [{ name: 'Firefox', type: 'browser' }, { name: 'SeaMonkey', type: 'browser' }]
-console.log(products.types);       // ['browser', 'mailer']
-console.log(products.number);      // 3
-
-
-// * ###################################################################
-
-const validator = {
-    set(obj, prop, value) {
-      if (prop === 'weight') {
-        if (!Number.isInteger(value)) {
-          throw new TypeError('The weight is not an integer');
-        }
-        if (value > 200) {
-          throw new RangeError('The weight seems invalid');
-        }
-      }
-  
-      // The default behavior to store the value
-      obj[prop] = value;
-  
-      // Indicate success
-      return true;
-    }
-  };
-  
-  const fish = new Proxy({}, validator);
-  
-  fish.weight = 100;
-  console.log(fish.weight); 
-  // expected output: 100
-  fish.weight = 'small';    // Throws an exception
-  fish.weight = 300;        // Throws an exception
-
-// * ###################################################################
-
-// const letters = ['a', 'b', 'c', 'd', 'e'];
-
-// const proxy = new Proxy(letters, {
-//     get(target, prop) {
-//         console.log("target-", target)
-//         console.log("prop-", prop)
-//         if (!isNaN(prop)) {
-//             prop = parseInt(prop, 10);
-//             if (prop < 0) {
-//                 prop += target.length;
-//             }
-//         }
-//         return target[prop];
+//   for(item of arr) {
+//     if(Array.isArray(item)) {
+//       deepFlattenI(item);
+//     } else {
+//       result.push(item)
 //     }
-// });
+//   }
+//   return result;
 
-// proxy[0]
+// }
 
-// * ###################################################################
+// console.log(deepFlattenI(arr))
 
-const importantData = {
-    name: 'John Doe',
-    age: 42
+
+// * Deep Flatten II (Reduce & Concat - Recursive)
+
+// function deepFlattenII(arr) {
+//     return arr.reduce((acc, val) => {
+//       // return acc.concat(val)
+//       return acc.concat(Array.isArray(val) ? deepFlattenII(val) : val)
+//     }, [])
+// }
+
+// console.log(deepFlattenII(arr))
+
+// * Deep Flatten III (Iterative Queue)
+
+// function deepFlattenIII(arr) {
+//   const queue = [...arr];
+//   while(queue.length) {
+//     const next = queue.shift();
+//     if(Array.isArray(next)) {      
+//       queue.unshift(...next)
+//     } else {
+//       result.push(next)
+//     }
+//   }
+//   return result
+// }
+
+// console.log(deepFlattenIII(arr));
+
+
+
+
+// * Deep Flatten IV (Combined Unique Vlaues or Non String)
+
+function deepFlattenIV (arr, level) {
+
+  for(item of arr) {
+    if(Array.isArray(item) && level > 0) {
+      level--;
+      deepFlattenIV(item, level);
+    } else {
+      result.push(item)
+    }
+  }
+  return result;
+
 }
 
-const handler = {
-    set: 'Read-Only',
-    defineProperty: 'Read-Only',
-    deleteProperty: 'Read-Only',
-    preventExtensions: 'Read-Only',
-    setPrototypeOf: 'Read-Only'
-}
-
-const proxy = new Proxy(importantData, handler)
-
-proxy.name = "Kartik"
-
-console.log(proxy)
+console.log(deepFlattenIV(arr,3))
