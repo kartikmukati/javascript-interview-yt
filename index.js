@@ -1,34 +1,56 @@
-const getFirstName = (person) => {
-  return person.name;
+// ? Deep equality is a concept in JavaScript that involves comparing complex data structures, such as arrays and objects.
+// * to determine if their contents are equal
+// * checks whether the elements within nested structures are also equal.
+
+const object1 = {
+  firstName: 'Kartik',
+  age: 20,
+  city: 'Delhi',
+  family: {
+    fatherName: 'abc',
+    motherName: 'abc1'
+  }
 }
 
-// First Function
-// const result1 = getFirstName({name: 'Unfiltered'})
-
-// console.log(result1)
-
-// Second Function
-const getUpperCase = (name) => {
-  return name.toUpperCase();
+const object2 = {
+  firstName: 'Kartik',
+  age: 20,
+  city: 'Delhi',
+  family: {
+    fatherName: 'abc',
+    motherName: 'abc1'
+  },
 }
 
-// const result2 = getUpperCase(result1)
+const deepEqualObjects = (object1, object2) => {
+  if(typeof object1 != 'object' || typeof object2 != 'object' || object1 === null || object2 === null) {
+    return false;
+  } else {
+    const keys1 = Object.keys(object1);
+    const keys2 = Object.keys(object2);
 
-// console.log(result2)
+    if(keys1.length != keys2.length) {
+      return false;
+    } else {
+      for(const key of keys1) {
+        if(!keys2.includes(key)) {
+          return false;
+        } else if(keys2.includes(key)) {
+          const value1 = object1[key];
+          const value2 = object2[key]
 
-// Third Function
-const get4Characters = (name) => {
-  return name.substring(0,4)
+          if(typeof object1[key] == 'object') {
+            if(!deepEqualObjects(object1[key], object2[key])) {
+              return false;
+            }
+          } else if(value1 != value2) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
 }
 
-// const result3 = get4Characters(result2)
-
-// console.log(result3)
-
-const reverse = (name) => {
-  return name.split('').reverse().join('')
-}
-
-const result4 = reverse(get4Characters(getUpperCase(getFirstName({name: 'Kartik'}))))
-
-console.log(result4)
+console.log(deepEqualObjects(object1, object2))
