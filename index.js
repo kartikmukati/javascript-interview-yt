@@ -1,31 +1,105 @@
-let attemptCounter = 0;
+const STATE = {
+  PENDING: 'PENDING',
+  FULFILLED: 'FULFILLED',
+  REJECTED: 'REJECTED'
+}
 
-const fetchData = async (APIURL, retries, delay) => {
-  try {
-    
-    attemptCounter++;
-    if(attemptCounter <= 3) {
-      throw new Error("Simulated network failure")
-    }
+class MyPromise {
+  constructor(callback) {
+    // ? it can be pending, fulfilled or rejected
+    this.state = STATE.PENDING;
+    // ? stores callback function like then, catch, finally
+    this.handlers = []; 
+    // ? resolved or rejected value
+    this.value = undefined;
 
-    const response = await fetch(APIURL);
-    console.log("Success:", response.status)
-    return response.data;
-  } catch(err) {
-    console.log(`Attempt ${attemptCounter} failed with error ${err.message}`)
-    if(retries > 0) {
-      // setTimeout(() => {
-      // }, delay)
+    try {
+      callback(this._resolve, this._reject)
+    } catch(err) {
 
-      await new Promise(resolve => setTimeout(resolve,delay))
-      fetchData(APIURL, retries - 1, delay)
-    } else {
-      throw new Error("All retries failed");
     }
   }
 
+  _resolve = (value) => {
+   this.updateResult(value, STATE.FULFILLED)
+  }
+
+  _reject = (value) => {
+    this.updateResult(value, STATE.REJECTED)
+  }
+
+  then(onSuccess, onFail) {
+     return new MyPromise((res, rej) => {
+      this.addHandler(
+        {
+          onSuccess: function(value) {
+            if(!onSuccess) {
+              return res(value);
+            }
+            try {
+              return res(onSuccess(value))
+            }catch(err) {
+              return rej(err)
+            }
+          },
+          onFail: function(value) {
+            if(!onFail)
+              return rej(value);
+            try {
+              return res(onFail(value));
+            } catch(err) {
+              return rej(err)
+            }
+          }
+        }
+      )
+    })
+  }
+
+  catch(onFail) {
+    return this.then(null, onFail);
+  }
+
+  updateResult(value, state) {
+    setTimeout(() => {
+
+      if(this.state !== STATE.PENDING)
+        return;
+
+      this.value = value;
+      this.state = state
+
+      // to execute pending handler;
+      this.executeHandlers();
+    },0)
+  }
+
+  addHandler(handler){
+    this.handlers.push(handler)
+    this.executeHandlers();
+  }
+
+  executeHandlers() {
+    if(this.state === STATE.PENDING)
+      return null;
+
+    this.handlers.forEach((handler) => {
+      if(this.state === STATE.FULFILLED) {
+        return handler.onSuccess(this.value)
+      }
+      return handler.onFail(this.value)
+    })
+    this.handlers = [];
+  }
 }
 
-const APIURL = 'https://jsonplaceholder.typicode.com/posts/1'
+const promise = new MyPromise((resolve, reject) => {
+  // resolve("hello")
+  reject("reject")
+})
 
-fetchData(APIURL, 5, 1000);
+promise.then((value) => {
+  console.log('then-',value)
+}).catch(err => {
+  console.log(err)
+})
