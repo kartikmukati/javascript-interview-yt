@@ -1,48 +1,45 @@
-const promise1 = Promise.resolve(5);
+const promise1 = Promise.reject(5);
 
-const promise2 = 2022;
+// const promise2 = 2022;
+const promise2 = Promise.reject("reject");
 
 const promise3 = new Promise((resolve, reject) => {
   setTimeout(() => {
-    reject("rejected for testing")
+    reject("reject for testing")
   },1000)
 })
 
 const promiseArr = [promise1, promise2, promise3]
 
-// Promise.allSettled(promiseArr).then((res) => {
+// Promise.any(promiseArr).then((res) => {
 //   console.log(res)
 // })
 
-const myAllSettled = (promiseArr) => {
+const myAny = (promiseArr) => {
+  let count = 0;
   return new Promise((resolve, reject) => {
-    let responses = [];
-    let count = 0;
     promiseArr.forEach((value, index) => {
       let promise = value;
 
       if(!(value instanceof Promise)) {
-        promise = Promise.resolve(value)
+        promise = Promise.resolve(value);
       }
 
       promise.then((data) => {
-        responses[index] = {status: 'fulfilled', value: data}
+        resolve(data);
+      }).catch(e => {
         count++;
-        if(count === promiseArr.length)
-          resolve(responses)
-      }).catch(err => {
-        responses[index] = {status: 'rejected', reason: err}
-        count++
-        if(count === promiseArr.length)
-          resolve(responses)
+        if(count === promiseArr.length) {
+          reject(new AggregateError([], "All promises were rejected"))
+        }
       })
 
     })
   })
 }
 
-Promise.myAllSettled = myAllSettled;
+Promise.myAny = myAny;
 
-Promise.myAllSettled(promiseArr).then((result) => {
-  console.log(result)
+Promise.myAny(promiseArr).then(res => {
+  console.log(res)
 })
