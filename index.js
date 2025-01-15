@@ -1,45 +1,38 @@
-const promise1 = Promise.reject(5);
-
-// const promise2 = 2022;
-const promise2 = Promise.reject("reject");
-
-const promise3 = new Promise((resolve, reject) => {
+const promise1 = new Promise((resolve, reject) => {
   setTimeout(() => {
-    reject("reject for testing")
-  },1000)
-})
+    reject("first promise");
+  }, 100);
+});
 
-const promiseArr = [promise1, promise2, promise3]
+const promise2 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve("second promise");
+  }, 100);
+});
 
-// Promise.any(promiseArr).then((res) => {
-//   console.log(res)
+const promiseArr = [promise1, promise2]
+
+// Promise.race(promiseArr).then(data => {
+//     console.log(data)
 // })
 
-const myAny = (promiseArr) => {
-  let count = 0;
-  return new Promise((resolve, reject) => {
-    promiseArr.forEach((value, index) => {
-      let promise = value;
-
-      if(!(value instanceof Promise)) {
-        promise = Promise.resolve(value);
-      }
-
-      promise.then((data) => {
-        resolve(data);
-      }).catch(e => {
-        count++;
-        if(count === promiseArr.length) {
-          reject(new AggregateError([], "All promises were rejected"))
+const myRace = (promiseArr) => {
+    return new Promise((resolve, reject) => {
+        if(promiseArr.length > 0) {
+            promiseArr.forEach((value, index) => {
+                let promise = value;
+                promise.then(data => {
+                    resolve(data)
+                }).catch(e => {
+                    reject(e)
+                })
+            })
         }
-      })
-
     })
-  })
 }
 
-Promise.myAny = myAny;
+Promise.myRace = myRace;
 
-Promise.myAny(promiseArr).then(res => {
-  console.log(res)
+Promise.myRace(promiseArr).then(data => {
+    console.log(data)
 })
