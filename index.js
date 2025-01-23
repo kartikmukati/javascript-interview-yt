@@ -1,38 +1,47 @@
-const promise1 = new Promise((resolve, reject) => {
-  setTimeout(() => {
-    reject("first promise");
-  }, 100);
-});
+// console.log("START")
+// setTimeout(() => {
+//   console.log("setTimeout")
+// }, 2000)
+// console.log("END")
 
-const promise2 = new Promise((resolve, reject) => {
-  setTimeout(() => {
-    resolve("second promise");
-  }, 100);
-});
+// const mySetTimeout = (cb, timer) => {
+//   let startTime = new Date().getTime();
+//   // console.log(startTime)
+//   let futureTime = startTime + timer;
+//   // console.log(futureTime)
+//   while(new Date().getTime() <= futureTime) {
+    
+//   }
+//   return cb();
+// }
 
-const promiseArr = [promise1, promise2]
+// mySetTimeout(() => {
+//   console.log("FINISHED")
+// }, 2000)
 
-// Promise.race(promiseArr).then(data => {
-//     console.log(data)
-// })
+const mySetTimeout = (cb, timer) => {
+  let startTime = new Date().getTime();
+  // console.log(startTime);
 
-const myRace = (promiseArr) => {
-    return new Promise((resolve, reject) => {
-        if(promiseArr.length > 0) {
-            promiseArr.forEach((value, index) => {
-                let promise = value;
-                promise.then(data => {
-                    resolve(data)
-                }).catch(e => {
-                    reject(e)
-                })
-            })
-        }
-    })
+  let executeSetTimeout = (...args) => {
+    let currentTime = new Date().getTime();
+    // console.log(currentTime)
+    // console.log("currentTime - startTime",currentTime - startTime)
+
+    if(currentTime - startTime >= timer) {
+      cb()
+    } else {
+      requestAnimationFrame(() => executeSetTimeout(...args))
+    }
+
+  }
+
+  requestAnimationFrame(executeSetTimeout)
+
 }
 
-Promise.myRace = myRace;
-
-Promise.myRace(promiseArr).then(data => {
-    console.log(data)
-})
+console.log("START")
+mySetTimeout(() => {
+  console.log("FINISHED")
+}, 3000)
+console.log("END")
