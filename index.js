@@ -1,47 +1,20 @@
-// console.log("START")
-// setTimeout(() => {
-//   console.log("setTimeout")
-// }, 2000)
-// console.log("END")
+// let i = 1;
+// window.setTimeout(() => {
+//   console.log(i++)
+// } , 2000)
+console.log("START")
+const mySetInterval = (cb, timer) => {
+  // console.log(cb)
 
-// const mySetTimeout = (cb, timer) => {
-//   let startTime = new Date().getTime();
-//   // console.log(startTime)
-//   let futureTime = startTime + timer;
-//   // console.log(futureTime)
-//   while(new Date().getTime() <= futureTime) {
-    
-//   }
-//   return cb();
-// }
-
-// mySetTimeout(() => {
-//   console.log("FINISHED")
-// }, 2000)
-
-const mySetTimeout = (cb, timer) => {
-  let startTime = new Date().getTime();
-  // console.log(startTime);
-
-  let executeSetTimeout = (...args) => {
-    let currentTime = new Date().getTime();
-    // console.log(currentTime)
-    // console.log("currentTime - startTime",currentTime - startTime)
-
-    if(currentTime - startTime >= timer) {
-      cb()
-    } else {
-      requestAnimationFrame(() => executeSetTimeout(...args))
-    }
-
+  const internalWrapper = () => {
+    cb();
+    // return setTimeout(internalWrapper, timer);
   }
-
-  requestAnimationFrame(executeSetTimeout)
-
+  setTimeout(internalWrapper, timer)
 }
 
-console.log("START")
-mySetTimeout(() => {
+mySetInterval(() => {
+  let i = 0
   console.log("FINISHED")
-}, 3000)
+}, 2000)
 console.log("END")
