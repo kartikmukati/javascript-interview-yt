@@ -1,20 +1,24 @@
-// let i = 1;
-// window.setTimeout(() => {
-//   console.log(i++)
-// } , 2000)
-console.log("START")
-const mySetInterval = (cb, timer) => {
-  // console.log(cb)
+let timeOutIds = []
 
-  const internalWrapper = () => {
-    cb();
-    // return setTimeout(internalWrapper, timer);
-  }
-  setTimeout(internalWrapper, timer)
+const originalSetTimeout = window.setTimeout;
+
+const setTimeout = (fn, delay) => {
+  const id = originalSetTimeout(fn, delay)
+  timeOutIds.push(id);
+  return id;
 }
 
-mySetInterval(() => {
-  let i = 0
-  console.log("FINISHED")
-}, 2000)
-console.log("END")
+const clearAllTimeout = () => {
+  while(timeOutIds.length) {
+    clearTimeout(timeOutIds.pop())
+  }
+
+}
+
+setTimeout(() => { console.log("Hello")}, 2000)
+setTimeout(() => { console.log("Hello2")}, 3000)
+setTimeout(() => { console.log("Hello3")}, 4000)
+setTimeout(() => { console.log("Hello4")}, 5000)
+setTimeout(() => { console.log("Hello5")}, 6000)
+
+clearAllTimeout();
